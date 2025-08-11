@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PSYCHOTEST by MARTIAL H</title>
+<meta name="theme-color" content="#0b102a">
+<style>
+:root{
+  --bg1:#050612; --bg2:#090b1e; --panel:#0d1027; --panel2:#12163a; --txt:#e6f7ff; --muted:#9fe3ff;
+  --cyan:#00e5ff; --magenta:#b967ff; --green:#00ffa3; --yellow:#f9ff4d; --red:#ff4d6d; --line:#1b2154;
+  --glow-cyan: 0 0 14px rgba(0,229,255,.45), 0 0 30px rgba(0,229,255,.25);
+  --glow-mag: 0 0 14px rgba(185,103,255,.45), 0 0 30px rgba(185,103,255,.25);
+  --glow-green: 0 0 14px rgba(0,255,163,.45), 0 0 30px rgba(0,255,163,.25);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{
+  margin:0; color:var(--txt); font-family:system-ui,-apple-system,Poppins,Inter,Segoe UI,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(1200px 800px at 70% -10%, #15205a 0, transparent 60%),
+    radial-gradient(900px 600px at 0% 110%, #3a105a 0, transparent 60%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.app{width:min(520px,94vw); height:min(820px,96vh); border:1px solid var(--line); border-radius:16px;
+  background:linear-gradient(180deg,rgba(15,18,45,.92),rgba(5,7,20,.92));
+  box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+  position:relative; overflow:hidden;
+}
+header{position:absolute; left:12px; right:12px; top:12px; z-index:5}
+.hud{display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap}
+.chip{padding:.45rem .6rem; border:1px solid var(--line); border-radius:999px; background:linear-gradient(180deg,rgba(18,22,58,.8),rgba(10,12,34,.8)); box-shadow:var(--glow-cyan); font-variant-numeric:tabular-nums}
+main{position:absolute; inset:68px 12px 84px 12px; display:grid; place-items:center}
+.card{width:100%; max-width:460px; background:linear-gradient(180deg,rgba(22,26,72,.96),rgba(12,14,38,.96)); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 14px 40px rgba(0,0,0,.25)}
+h1{margin:.2rem 0 .6rem; font-size:22px; text-align:center; text-shadow:var(--glow-mag)}
+h2{margin:.2rem 0 .6rem; font-size:20px; text-align:center}
+p{margin:.2rem 0}
+.muted{color:var(--muted); text-align:center}
+.btn{appearance:none; border:1px solid var(--line); background:linear-gradient(180deg,rgba(25,31,84,.9),rgba(16,18,48,.9)); color:var(--txt); border-radius:12px; padding:.9rem 1rem; width:100%; font-weight:800; letter-spacing:.02em; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.btn.primary{background:linear-gradient(135deg,#00e5ff,#7aa2ff); color:#06122a; border-color:transparent; box-shadow:0 10px 30px rgba(0,229,255,.35)}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+.grid{display:grid; gap:10px}
+.center{text-align:center}
+.input{width:100%; padding:1rem; border-radius:12px; border:1px solid #2a3688; background:linear-gradient(180deg,#070a1b,#0b0f26); color:var(--txt); font-weight:800; text-align:center; font-size:20px; box-shadow:inset var(--glow-cyan)}
+.options{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+.tag{display:inline-flex; gap:8px; align-items:center; padding:.35rem .55rem; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.04); color:var(--muted); font-size:.9rem}
+.ok{color:var(--green); text-align:center; margin-top:.3rem}
+.ko{color:var(--red); text-align:center; margin-top:.3rem}
+footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:10px; justify-content:space-between}
+.ghost{background:transparent; box-shadow:var(--glow-cyan) inset}
+.hidden{display:none!important}
+/* victory */
+.victory{display:grid; place-items:center; gap:10px; padding:20px; text-align:center}
+.victory h1{font-size:28px; color:#bfefff; text-shadow:0 0 12px rgba(0,229,255,.6), 0 0 30px rgba(185,103,255,.45); animation:pulse 1.8s infinite ease-in-out}
+@keyframes pulse{0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)}}
+.small{font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="PSYCHOTEST by MARTIAL H">
+  <header>
+    <div class="hud">
+      <div class="chip">⏱️ <b id="time">00:00</b></div>
+      <div class="chip">🎯 <b id="level">—</b></div>
+      <div class="chip">⭐ <b id="score">0</b></div>
+      <div class="chip">🧩 <b id="progress">0/0</b></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home -->
+    <section id="screen-home" class="card">
+      <h1>PSYCHOTEST<br><span style="font-size:.9em">by <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></span></h1>
+      <p class="muted">Entraînement psychotechnique — 10 niveaux, 10 tests aléatoires par niveau.</p>
+      <div class="grid" style="margin-top:10px">
+        <button class="btn primary" id="btnStart">▶️ Démarrer</button>
+        <button class="btn" id="btnContinue" disabled>⏩ Continuer</button>
+      </div>
+      <div class="center small" style="margin-top:6px"><span class="tag">Mobile • tactile</span></div>
+    </section>
+
+    <!-- Play -->
+    <section id="screen-play" class="card hidden">
+      <div class="center"><div id="qType" class="tag">—</div></div>
+      <h2 id="question">Question</h2>
+      <div id="qArea" style="margin-top:6px"></div>
+      <div id="feedback" class="muted" aria-live="polite" style="min-height:1.2em; margin-top:6px"></div>
+      <div class="grid" style="margin-top:10px">
+        <button id="btnValidate" class="btn">Valider</button>
+        <button id="btnNext" class="btn hidden">Suivant</button>
+      </div>
+    </section>
+
+    <!-- End of level -->
+    <section id="screen-end" class="card hidden">
+      <h2 id="endTitle">Niveau terminé</h2>
+      <p id="endDesc" class="muted">—</p>
+      <div class="grid" style="margin-top:10px">
+        <button id="btnNextLevel" class="btn primary">Niveau suivant</button>
+        <button id="btnRetry" class="btn">Recommencer le niveau</button>
+      </div>
+    </section>
+
+    <!-- Victory -->
+    <section id="screen-victory" class="card hidden victory">
+      <h1>Victoire — <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></h1>
+      <p class="muted">Tu as complété les 10 niveaux de PSYCHOTEST !</p>
+      <div class="grid" style="width:100%; max-width:320px; margin-top:8px">
+        <button id="btnReplay" class="btn">Rejouer depuis le niveau 1</button>
+        <button id="btnHome" class="btn ghost">Retour accueil</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="btnRules" class="btn ghost" style="width:auto;padding:.6rem .8rem">❓ Règles</button>
+    <button id="btnQuit" class="btn ghost" style="width:auto;padding:.6rem .8rem">Quitter</button>
+  </footer>
+</div>
+
+<dialog id="rules" style="max-width:560px;width:92%;border:1px solid #26307a;border-radius:12px;background:linear-gradient(180deg,rgba(22,26,72,.98),rgba(12,14,38,.98));color:var(--txt)">
+  <div style="padding:14px">
+    <h3 style="margin:.2rem 0 .4rem;text-shadow:var(--glow-cyan)">Règles</h3>
+    <ul class="small">
+      <li>10 niveaux. Chaque niveau génère <b>10 tests aléatoires</b>.</li>
+      <li>Tu réponds à une question à la fois. Chrono par niveau.</li>
+      <li>Score = bonnes réponses (+10) + bonus de temps.</li>
+      <li>Progression sauvegardée (localStorage).</li>
+    </ul>
+    <div style="text-align:right"><button id="closeRules" class="btn" style="width:auto;padding:.5rem .8rem">OK</button></div>
+  </div>
+</dialog>
+
+<script>
+(()=>{'use strict';
+
+/* ---------- Simple Sound (WebAudio) ---------- */
+let actx;
+function beep(type='ok'){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.connect(g); g.connect(actx.destination);
+    const now = actx.currentTime;
+    if(type==='ok'){ o.frequency.setValueAtTime(880, now); g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.18, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.15); }
+    else if(type==='bad'){ o.frequency.setValueAtTime(220, now); g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.22, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.25); }
+    else { o.frequency.setValueAtTime(660, now); g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.35, now+0.02); g.gain.exponentialRampToValueAtTime(0.0001, now+0.5); }
+    o.start(); o.stop(now+0.5);
+  }catch(e){}
+}
+
+/* ---------- State ---------- */
+const timeEl = document.getElementById('time');
+const levelEl = document.getElementById('level');
+const scoreEl = document.getElementById('score');
+const progEl  = document.getElementById('progress');
+
+const scrHome = document.getElementById('screen-home');
+const scrPlay = document.getElementById('screen-play');
+const scrEnd  = document.getElementById('screen-end');
+const scrVictory = document.getElementById('screen-victory');
+
+const qTypeEl = document.getElementById('qType');
+const qEl     = document.getElementById('question');
+const qArea   = document.getElementById('qArea');
+const feedback= document.getElementById('feedback');
+const btnValidate = document.getElementById('btnValidate');
+const btnNext = document.getElementById('btnNext');
+
+let level = Number(localStorage.getItem('psy_level')||1);
+let score = Number(localStorage.getItem('psy_score')||0);
+let inLevel = false;
+let startedAt = 0;
+let totalTime = 0;
+let timerId = null;
+
+let tasks = []; // array of {render, check, type}
+let idx = 0;
+
+scoreEl.textContent = score;
+levelEl.textContent = level;
+document.getElementById('btnContinue').disabled = level<=1;
+
+/* ---------- Levels time (seconds, 1..10) ---------- */
+const levelTimes = [0, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150];
+
+/* ---------- Utilities ---------- */
+const rint = (a,b)=> Math.floor(Math.random()*(b-a+1))+a;
+const sample = (arr,n)=> { const c=arr.slice(); const out=[]; while(out.length<n){ out.push(c.splice(Math.floor(Math.random()*c.length),1)[0]||arr[Math.floor(Math.random()*arr.length)]); } return out; };
+const shuffle = (arr)=> arr.map(v=> [Math.random(), v]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]);
+const pad = n=> String(n).padStart(2,'0');
+const fmt = s=> pad(Math.floor(s/60))+':'+pad(Math.floor(s%60));
+
+/* ---------- Task builders ---------- */
+function makeInputTask(type, html, answer){
+  let correct = answer;
+  return {
+    type, 
+    render(area){
+      area.innerHTML = `<div class="center muted small" style="margin-bottom:6px">${html}</div>
+        <input id="ans" class="input" inputmode="numeric" placeholder="Réponse">`;
+      setTimeout(()=> document.getElementById('ans')?.focus(), 20);
+    },
+    check(){
+      const v = document.getElementById('ans')?.value.trim();
+      return String(v) === String(correct);
+    }
+  };
+}
+function makeTextTask(type, html, answer){
+  return {
+    type,
+    render(area){
+      area.innerHTML = `<div class="center muted" style="margin-bottom:6px">${html}</div>
+        <input id="ans" class="input" inputmode="text" placeholder="Réponse (lettre/symbole)">`;
+      setTimeout(()=> document.getElementById('ans')?.focus(), 20);
+    },
+    check(){
+      const v = (document.getElementById('ans')?.value||'').trim().toUpperCase();
+      return v === String(answer).toUpperCase();
+    }
+  };
+}
+function makeMCQ(type, html, options, correct){
+  return {
+    type,
+    render(area){
+      area.innerHTML = `<div class="center muted" style="margin-bottom:6px">${html}</div>
+        <div class="options" id="opts"></div>
+        <input id="ans" class="hidden">`;
+      const box = area.querySelector('#opts');
+      options.forEach(opt=>{
+        const b = document.createElement('button');
+        b.className='btn'; b.textContent=opt; b.type='button';
+        b.onclick = ()=>{ document.querySelectorAll('#opts .btn').forEach(x=>x.classList.remove('primary')); b.classList.add('primary'); document.getElementById('ans').value = opt; };
+        box.appendChild(b);
+      });
+    },
+    check(){
+      const v = (document.getElementById('ans')?.value||'').trim();
+      return v === String(correct);
+    }
+  };
+}
+
+/* ---------- Generators (12 types) ---------- */
+function genArithmetic(){
+  const a=rint(5,60), b=rint(5,60), c=rint(2,9);
+  const mode = rint(1,4);
+  let text, ans;
+  if(mode===1){ text = `(${a} + ${b}) × ${c}`; ans = (a+b)*c; }
+  else if(mode===2){ text = `(${a*c} ÷ ${c}) + ${b}`; ans = a + b; }
+  else if(mode===3){ text = `${a} × ${c} − ${b}`; ans = a*c - b; }
+  else { text = `${a} + ${b} + ${c}`; ans = a+b+c; }
+  return makeInputTask('Calcul mental', text, ans);
+}
+function genNumberSequence(){
+  const start = rint(1,15), step = rint(1,9), len=5;
+  const seq = Array.from({length:len}, (_,i)=> start + step*i);
+  const ans = start + step*len;
+  return makeInputTask('Suite numérique', seq.join(' , ') + ' , ?', ans);
+}
+function genLetterSequence(){
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const start = rint(0,22), step = [1,2,3][rint(0,2)], len=4;
+  const seq = Array.from({length:len}, (_,i)=> letters[(start + step*i)%26]);
+  const ans = letters[(start + step*len)%26];
+  return makeTextTask('Suite de lettres', seq.join(' , ') + ' , ?', ans);
+}
+function genAnalogy(){
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const shift = [1,2,3,4][rint(0,3)];
+  const A = letters[rint(0,25)], B = letters[(letters.indexOf(A)+shift)%26];
+  const C = letters[rint(0,25)], D = letters[(letters.indexOf(C)+shift)%26];
+  return makeTextTask('Analogie', `${A} est à ${B} comme ${C} est à ?`, D);
+}
+function genAttention(){
+  const symbols = ['◆','●','■','▲','★','✚','✦'];
+  const target = symbols[rint(0,symbols.length-1)];
+  const total = rint(18,28);
+  let arr = [], count = 0;
+  for(let i=0;i<total;i++){
+    const s = symbols[rint(0,symbols.length-1)];
+    if(s===target) count++;
+    arr.push(s);
+  }
+  const cloud = shuffle(arr).join(' ');
+  return makeInputTask('Attention', `Compte les "${target}" :<br><div class="card" style="text-align:center;font-size:22px;margin-top:6px">${cloud}</div>`, count);
+}
+function genMemory(){
+  const len=rint(6,8);
+  const code = Array.from({length:len}, ()=> rint(0,9)).join('');
+  return {
+    type: 'Mémoire',
+    render(area){
+      area.innerHTML = `<div class="center muted small">Mémorise ce nombre (2s)…</div>
+        <div class="center" style="font-size:28px;margin:6px 0"><b id="mem">${code}</b></div>
+        <input id="ans" class="input" inputmode="numeric" placeholder="Entre le nombre vu" disabled>`;
+      setTimeout(()=>{
+        const mem = area.querySelector('#mem'); if(mem){ mem.textContent = '••••••'; }
+        area.querySelector('#ans').disabled=false; area.querySelector('#ans').focus();
+      }, 2000);
+    },
+    check(){ const v = (document.getElementById('ans')?.value||'').trim(); return v === code; }
+  };
+}
+function genSpatial(){
+  const turns = [1,2,3][rint(0,2)];
+  const dir = ['Est','Sud','Ouest'][turns-1];
+  const svg = `<svg width="120" height="120" viewBox="0 0 120 120">
+    <rect x="0" y="0" width="120" height="120" rx="16" fill="#0b0f26" stroke="#2a3688"/>
+    <g transform="translate(60,60)">
+      <rect x="-12" y="-36" width="24" height="72" fill="#7aa2ff"/>
+      <rect x="-12" y="12" width="48" height="24" fill="#7aa2ff"/>
+    </g></svg>`;
+  const opts = ['Nord','Est','Sud','Ouest'];
+  const ans = dir;
+  return makeMCQ('Rotation mentale', `Tourne la forme de <b>${turns}× 90°</b> <u>sens horaire</u>. Le pied pointe vers ?<br>${svg}`, opts, ans);
+}
+function genOddOneOut(){
+  const base = rint(2,9);
+  let arr = [base*2, base*3, base*4, base*5];
+  const intrus = rint(11,29); arr[rint(0,3)] = intrus;
+  const ans = arr.indexOf(intrus)+1;
+  return makeInputTask('Intrus', `Trouve l'intrus (donne la <b>position 1-4</b>) :<br><b>${arr.join('  •  ')}</b>`, ans);
+}
+function genCompare(){
+  const base = 'AABBAABBABBAAB'.split('');
+  const diffs = rint(2,4);
+  let b2 = base.slice();
+  for(let i=0;i<diffs;i++){ const j=rint(0,base.length-1); b2[j] = b2[j]==='A'?'B':'A'; }
+  return makeInputTask('Comparaison', `Combien de différences entre :<br><code>${base.join('')}</code><br><code>${b2.join('')}</code>`, diffs);
+}
+function genOrder(){
+  let arr = Array.from({length:5}, ()=> rint(5,99));
+  const sorted = arr.slice().sort((a,b)=>a-b);
+  const ans = sorted[2];
+  return makeInputTask('Ordre', `Quel est le <b>3ᵉ</b> plus petit nombre ?<br><b>${arr.join('  •  ')}</b>`, ans);
+}
+function genSymbols(){
+  const s = ['◇','◇','◇','◇','◇','◇','◇','◇','◇','◇'];
+  const special = ['◆','●','■','★'][rint(0,3)];
+  s[rint(0, s.length-1)] = special;
+  return makeTextTask('Détail visuel', `Quel est le symbole <b>différent</b> ?<br><div class="center" style="font-size:26px;margin-top:6px">${shuffle(s).join(' ')}</div>`, special);
+}
+function genLogicPattern(){
+  // logique simple: paire/impair/multiple
+  const a = rint(2,9);
+  const seq = [a, a+2, a+4, a+6];
+  const ans = a+8;
+  return makeInputTask('Logique', `Complète la suite : ${seq.join(' , ')} , ?`, ans);
+}
+
+/* ---------- Bank ---------- */
+const bank = [genArithmetic, genNumberSequence, genLetterSequence, genAnalogy, genAttention, genMemory, genSpatial, genOddOneOut, genCompare, genOrder, genSymbols, genLogicPattern];
+
+/* ---------- Flow ---------- */
+function show(id){
+  [scrHome,scrPlay,scrEnd,scrVictory].forEach(s=> s.classList.toggle('hidden', s.id!==id));
+}
+
+function difficultyBias(lvl){
+  // renvoie un facteur (1..3) pour ajuster certains paramètres si besoin
+  return Math.min(3, 1 + Math.floor((lvl-1)/3));
+}
+
+function buildLevelTasks(lvl){
+  // 10 tâches tirées de la banque, avec mélange
+  const gens = sample(bank, 10);
+  return gens.map(g => g());
+}
+
+function startLevel(lvl){
+  level = lvl;
+  levelEl.textContent = level;
+  totalTime = levelTimes[level] || 90;
+  startedAt = performance.now();
+  inLevel = true;
+
+  tasks = buildLevelTasks(level);
+  idx = 0;
+
+  scoreEl.textContent = score;
+  progEl.textContent = `0/${tasks.length}`;
+  btnNext.classList.add('hidden');
+  btnValidate.classList.remove('hidden');
+  renderTask();
+  show('screen-play');
+  tick();
+}
+
+function renderTask(){
+  feedback.textContent = '';
+  feedback.className = 'muted';
+  const task = tasks[idx];
+  qTypeEl.textContent = task.type;
+  qEl.textContent = `Question ${idx+1}`;
+  qArea.innerHTML = '';
+  task.render(qArea);
+}
+
+function tick(){
+  if(!inLevel) return;
+  const elapsed = (performance.now() - startedAt)/1000;
+  const remain = Math.max(0, totalTime - elapsed);
+  timeEl.textContent = fmt(remain);
+  if(remain<=0){
+    inLevel = false;
+    endLevel(false, 'Temps écoulé');
+    return;
+  }
+  timerId = requestAnimationFrame(tick);
+}
+
+function validate(){
+  const ok = tasks[idx].check();
+  if(ok){
+    beep('ok');
+    feedback.textContent = 'Correct ✅ (+10)';
+    feedback.className = 'ok';
+    score += 10;
+    scoreEl.textContent = score;
+    btnValidate.classList.add('hidden');
+    btnNext.classList.remove('hidden');
+  }else{
+    beep('bad');
+    feedback.textContent = 'Incorrect ❌';
+    feedback.className = 'ko';
+  }
+}
+
+function next(){
+  if(idx < tasks.length-1){
+    idx++;
+    progEl.textContent = `${idx}/${tasks.length}`;
+    btnNext.classList.add('hidden');
+    btnValidate.classList.remove('hidden');
+    renderTask();
+  }else{
+    const elapsed = (performance.now() - startedAt)/1000;
+    const remain = Math.max(0, Math.floor((totalTime - elapsed)));
+    score += remain;
+    scoreEl.textContent = score;
+    inLevel = false;
+    endLevel(true, `Bonus temps : +${remain}`);
+  }
+}
+
+function endLevel(success, msg){
+  cancelAnimationFrame(timerId);
+  document.getElementById('endTitle').textContent = success ? `Niveau ${level} terminé` : `Niveau ${level} perdu`;
+  document.getElementById('endDesc').innerHTML = msg || '';
+  show('screen-end');
+  localStorage.setItem('psy_score', String(score));
+  if(success){
+    const nextLvl = level+1;
+    localStorage.setItem('psy_level', String(nextLvl));
+    document.getElementById('btnNextLevel').disabled = (nextLvl>10);
+    if(nextLvl>10){
+      setTimeout(()=>{ show('screen-victory'); beep('victory'); }, 700);
+    }
+  }else{
+    localStorage.setItem('psy_level', String(level));
+    document.getElementById('btnNextLevel').disabled = true;
+  }
+  document.getElementById('btnContinue').disabled = false;
+}
+
+/* ---------- Optional strict lose on leaving the app ----------
+document.addEventListener('visibilitychange', ()=>{ if(inLevel && document.hidden){ inLevel=false; endLevel(false, 'Écran quitté'); }});
+window.addEventListener('blur', ()=>{ if(inLevel){ inLevel=false; endLevel(false, 'Écran quitté'); }});
+---------------------------------------------------------------- */
+
+/* ---------- Buttons ---------- */
+document.getElementById('btnStart').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); startLevel(1); };
+document.getElementById('btnContinue').onclick = ()=> startLevel(Number(localStorage.getItem('psy_level')||1));
+btnValidate.onclick = validate;
+btnNext.onclick = next;
+document.getElementById('btnNextLevel').onclick = ()=> startLevel(level+1);
+document.getElementById('btnRetry').onclick = ()=> startLevel(level);
+document.getElementById('btnReplay').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); show('screen-home'); document.getElementById('btnContinue').disabled=false; scoreEl.textContent='0'; levelEl.textContent='1'; };
+document.getElementById('btnHome').onclick = ()=> show('screen-home');
+document.getElementById('btnRules').onclick = ()=> document.getElementById('rules').showModal();
+document.getElementById('closeRules').onclick = ()=> document.getElementById('rules').close();
+document.getElementById('btnQuit').onclick = ()=> { show('screen-home'); };
+
+/* ---------- Init ---------- */
+progEl.textContent = '0/0';
+timeEl.textContent = '00:00';
+levelEl.textContent = level;
+scoreEl.textContent = score;
+
+})();</script>
+</body>
+</html>
