@@ -51,6 +51,7 @@ p{margin:.2rem 0}
 .btn.warn{background:linear-gradient(180deg,#2b0f24,#190916); border-color:#61203f}
 .row{display:flex; gap:8px; flex-wrap:wrap}
 .grid{display:grid; gap:8px}
+.gridLevels{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .center{text-align:center}
 .input{width:100%; padding:.9rem; border-radius:12px; border:1px solid #2a3688; background:linear-gradient(180deg,#070a1b,#0b0f26); color:var(--txt); font-weight:800; text-align:center; font-size:19px; box-shadow:inset var(--glow-cyan)}
 .options{display:grid; grid-template-columns: 1fr 1fr; gap:8px}
@@ -76,7 +77,6 @@ footer{
 <div class="app" role="application" aria-label="PSYCHOTEST by MARTIAL H">
   <header>
     <div class="hud">
-      <div class="chip">⏱️ <b id="time">00:00</b></div>
       <div class="chip">🎯 <b id="level">—</b></div>
       <div class="chip">⭐ <b id="score">0</b></div>
       <div class="chip">🧩 <b id="progress">0/0</b></div>
@@ -87,10 +87,19 @@ footer{
     <!-- Home -->
     <section id="screen-home" class="card">
       <h1>PSYCHOTEST<br><span style="font-size:.95em">by <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></span></h1>
-      <p class="muted">10 niveaux • 10 tests aléatoires par niveau • Mobile only</p>
+      <p class="muted">Sans minuteur • +10 points par bonne réponse • Mobile only</p>
       <div class="grid" style="margin-top:8px">
-        <button class="btn primary" id="btnStart">▶️ Démarrer</button>
+        <button class="btn primary" id="btnQuickStart">▶️ Démarrer (Niv. 1)</button>
         <button class="btn" id="btnContinue" disabled>⏩ Continuer</button>
+      </div>
+      <div class="grid" style="margin-top:8px">
+        <div class="card" style="padding:10px">
+          <div class="center small" style="margin-bottom:6px"><span class="tag">Choisir un niveau librement</span></div>
+          <div class="gridLevels" id="levelsGrid"></div>
+          <div class="grid" style="margin-top:8px">
+            <button class="btn warn" id="btnBenin">🇧🇯 Niveau BENIN (50 tests)</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -121,13 +130,14 @@ footer{
         <button id="btnShowAll" class="btn warn hidden">Voir toutes les réponses du niveau</button>
         <button id="btnNextLevel" class="btn primary">Niveau suivant</button>
         <button id="btnRetry" class="btn">Recommencer le niveau</button>
+        <button id="btnHome2" class="btn ghost">Accueil</button>
       </div>
     </section>
 
     <!-- Victory -->
     <section id="screen-victory" class="card hidden victory">
       <h1>VICTOIRE</h1>
-      <p class="muted">Bravo, tu as complété les 10 niveaux de PSYCHOTEST !</p>
+      <p class="muted">Bravo, tu as complété tous les tests !</p>
       <div class="grid" style="width:100%; max-width:320px; margin-top:8px">
         <button id="btnReplay" class="btn">Rejouer depuis le niveau 1</button>
         <button id="btnHome" class="btn ghost">Retour accueil</button>
@@ -145,11 +155,11 @@ footer{
   <div style="padding:12px">
     <h3 style="margin:.2rem 0 .3rem;text-shadow:var(--glow-cyan)">Règles</h3>
     <ul class="small">
-      <li>10 niveaux. Chaque niveau génère <b>10 tests aléatoires</b>.</li>
-      <li>Une question à la fois. Chrono par niveau.</li>
-      <li>Score = bonnes réponses (+10) + bonus de temps.</li>
-      <li>Tu peux <b>passer</b> une question et <b>voir la réponse</b>.</li>
-      <li>Progression sauvegardée (localStorage).</li>
+      <li>10 niveaux (libres) + <b>Niveau BENIN</b> (50 tests).</li>
+      <li>Aucun minuteur. Score : <b>+10</b> par bonne réponse.</li>
+      <li>Tu peux <b>Passer</b> et <b>Voir la réponse</b> à tout moment.</li>
+      <li>Progression et score sauvegardés (localStorage).</li>
+      <li>Perte = Abandon/ Quitter (tu peux voir toutes les réponses).</li>
     </ul>
     <div style="text-align:right"><button id="closeRules" class="btn" style="width:auto;padding:.5rem .8rem">OK</button></div>
   </div>
@@ -175,7 +185,6 @@ function beep(type='ok'){
 }
 
 /* ---------- State ---------- */
-const timeEl = document.getElementById('time');
 const levelEl = document.getElementById('level');
 const scoreEl = document.getElementById('score');
 const progEl  = document.getElementById('progress');
@@ -197,26 +206,20 @@ const btnShowAnswer = document.getElementById('btnShowAnswer');
 let level = Number(localStorage.getItem('psy_level')||1);
 let score = Number(localStorage.getItem('psy_score')||0);
 let inLevel = false;
-let startedAt = 0;
-let totalTime = 0;
-let timerId = null;
+let currentIsBenin = false;
+let beninMode = false;
 
-let tasks = []; // array of {type, render(area), check() -> bool, solution, label}
+let tasks = []; // {type, render(area), check() -> bool, solution, label}
 let idx = 0;
 
 scoreEl.textContent = score;
 levelEl.textContent = level;
 document.getElementById('btnContinue').disabled = level<=1;
 
-/* ---------- Levels time (seconds, 1..10) ---------- */
-const levelTimes = [0, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150];
-
 /* ---------- Utilities ---------- */
 const rint = (a,b)=> Math.floor(Math.random()*(b-a+1))+a;
 const sample = (arr,n)=> { const c=arr.slice(); const out=[]; while(out.length<n){ out.push(c.splice(Math.floor(Math.random()*c.length),1)[0]||arr[Math.floor(Math.random()*arr.length)]); } return out; };
 const shuffle = (arr)=> arr.map(v=> [Math.random(), v]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]);
-const pad = n=> String(n).padStart(2,'0');
-const fmt = s=> pad(Math.floor(s/60))+':'+pad(Math.floor(s%60));
 
 /* ---------- Task builders w/ solutions ---------- */
 function makeInputTask(type, html, answer){
@@ -239,7 +242,7 @@ function makeTextTask(type, html, answer){
     type, solution: String(answer), label: html.replace(/<[^>]+>/g,''),
     render(area){
       area.innerHTML = `<div class="center muted" style="margin-bottom:6px">${html}</div>
-        <input id="ans" class="input" inputmode="text" placeholder="Réponse (lettre/symbole)">`;
+        <input id="ans" class="input" inputmode="text" placeholder="Réponse (lettre)">`;
       setTimeout(()=> document.getElementById('ans')?.focus(), 20);
     },
     check(){
@@ -270,7 +273,7 @@ function makeMCQ(type, html, options, correct){
   };
 }
 
-/* ---------- Generators (12 types) ---------- */
+/* ---------- Global Bank (12 types, symbol tests -> MCQ) ---------- */
 function genArithmetic(){
   const a=rint(5,60), b=rint(5,60), c=rint(2,9);
   const mode = rint(1,4);
@@ -312,7 +315,9 @@ function genAttention(){
     arr.push(s);
   }
   const cloud = shuffle(arr).join(' ');
-  return makeInputTask('Attention', `Compte les "${target}" :<br><div class="card" style="text-align:center;font-size:22px;margin-top:6px">${cloud}</div>`, count);
+  // MCQ pour éviter la saisie de symboles
+  const options = [count, count+1, Math.max(0,count-1), count+2].map(String);
+  return makeMCQ('Attention', `Combien de "${target}" ?<br><div class="card" style="text-align:center;font-size:22px;margin-top:6px">${cloud}</div>`, shuffle(options), String(count));
 }
 function genMemory(){
   const len=rint(6,8);
@@ -341,60 +346,165 @@ function genSpatial(){
       <rect x="-12" y="12" width="48" height="24" fill="#7aa2ff"/>
     </g></svg>`;
   const opts = ['Nord','Est','Sud','Ouest'];
-  const ans = dir;
-  return makeMCQ('Rotation mentale', `Tourne la forme de <b>${turns}× 90°</b> <u>sens horaire</u>. Le pied pointe vers ?<br>${svg}`, opts, ans);
+  return makeMCQ('Rotation mentale', `Tourne la forme de <b>${turns}× 90°</b> <u>sens horaire</u>. Le pied pointe vers ?<br>${svg}`, opts, dir);
 }
 function genOddOneOut(){
   const base = rint(2,9);
   let arr = [base*2, base*3, base*4, base*5];
   const intrus = rint(11,29); arr[rint(0,3)] = intrus;
   const ans = arr.indexOf(intrus)+1;
-  return makeInputTask('Intrus', `Trouve l'intrus (donne la <b>position 1-4</b>) :<br><b>${arr.join('  •  ')}</b>`, ans);
+  // MCQ positions
+  const opts = shuffle([1,2,3,4].map(String));
+  return makeMCQ('Intrus', `Quelle est la <b>position</b> de l'intrus ?<br><b>${arr.join('  •  ')}</b>`, opts, String(ans));
 }
 function genCompare(){
   const base = 'AABBAABBABBAAB'.split('');
   const diffs = rint(2,4);
   let b2 = base.slice();
   for(let i=0;i<diffs;i++){ const j=rint(0,base.length-1); b2[j] = b2[j]==='A'?'B':'A'; }
-  return makeInputTask('Comparaison', `Combien de différences entre :<br><code>${base.join('')}</code><br><code>${b2.join('')}</code>`, diffs);
+  const options = shuffle([diffs, diffs+1, Math.max(0,diffs-1), diffs+2].map(String));
+  return makeMCQ('Comparaison', `Combien de différences entre :<br><code>${base.join('')}</code><br><code>${b2.join('')}</code>`, options, String(diffs));
 }
 function genOrder(){
   let arr = Array.from({length:5}, ()=> rint(5,99));
   const sorted = arr.slice().sort((a,b)=>a-b);
   const ans = sorted[2];
-  return makeInputTask('Ordre', `Quel est le <b>3ᵉ</b> plus petit nombre ?<br><b>${arr.join('  •  ')}</b>`, ans);
+  const options = shuffle([sorted[0], sorted[1], sorted[2], sorted[3]].map(String));
+  return makeMCQ('Ordre', `Quel est le <b>3ᵉ</b> plus petit ?<br><b>${arr.join('  •  ')}</b>`, options, String(ans));
 }
 function genSymbols(){
-  const s = ['◇','◇','◇','◇','◇','◇','◇','◇','◇','◇'];
-  const special = ['◆','●','■','★'][rint(0,3)];
-  s[rint(0, s.length-1)] = special;
-  return makeTextTask('Détail visuel', `Quel est le symbole <b>différent</b> ?<br><div class="center" style="font-size:26px;margin-top:6px">${shuffle(s).join(' ')}</div>`, special);
+  // unique symbole -> MCQ avec 4 choix (incluant symboles non clavier)
+  const pool = ['◇','◆','●','■','▲','★','✚','✦','✪','☼'];
+  const grid = Array.from({length:10},()=> '◇');
+  const odd = pool[rint(1,pool.length-1)];
+  const pos = rint(0,grid.length-1); grid[pos]=odd;
+  const options = shuffle([odd, '●','■','★']).slice(0,4);
+  return makeMCQ('Détail visuel', `Quel est le symbole <b>différent</b> ?<br><div class="center" style="font-size:26px;margin-top:6px">${grid.join(' ')}</div>`, options, odd);
 }
 function genLogicPattern(){
   const a = rint(2,9);
   const seq = [a, a+2, a+4, a+6];
   const ans = a+8;
-  return makeInputTask('Logique', `Complète la suite : ${seq.join(' , ')} , ?`, ans);
+  const options = shuffle([ans, ans+1, ans-1, ans+2].map(String));
+  return makeMCQ('Logique', `Complète la suite : ${seq.join(' , ')} , ?`, options, String(ans));
 }
+const globalBank = [genArithmetic, genNumberSequence, genLetterSequence, genAnalogy, genAttention, genMemory, genSpatial, genOddOneOut, genCompare, genOrder, genSymbols, genLogicPattern];
 
-/* ---------- Bank ---------- */
-const bank = [genArithmetic, genNumberSequence, genLetterSequence, genAnalogy, genAttention, genMemory, genSpatial, genOddOneOut, genCompare, genOrder, genSymbols, genLogicPattern];
+/* ---------- BENIN Bank (50 tests par niveau BENIN) ---------- */
+function bn_fcfa_remise(){
+  const prix=[2500,3500,5000,7500,10000][rint(0,4)];
+  const remise=[5,10,15,20][rint(0,3)];
+  const ans = Math.round(prix*(100-remise)/100);
+  const opts = shuffle([ans, ans+200, Math.max(0,ans-200), ans+100].map(String));
+  return makeMCQ('BENIN • FCFA', `Prix: <b>${prix} FCFA</b>, remise <b>${remise}%</b>. À payer ?`, opts, String(ans));
+}
+function bn_rendu_marche(){
+  const a1=[['ananas',350],['tomate',150],['œuf',100],['oignon',200]][rint(0,3)];
+  const a2=[['banane',100],['poivron',250],['piment',50],['pain',150]][rint(0,3)];
+  const q1=rint(1,4), q2=rint(1,5);
+  const total=q1*a1[1]+q2*a2[1];
+  const payé=[1000,2000,5000][rint(0,2)];
+  const rendu=payé-total;
+  const opts = shuffle([rendu, rendu-50, rendu+50, rendu+100].map(String));
+  return makeMCQ('BENIN • Marché', `${q1}× ${a1[0]} (${a1[1]}) + ${q2}× ${a2[0]} (${a2[1]}) payé <b>${payé} FCFA</b> → rendu ?`, opts, String(rendu));
+}
+function bn_transport_temps(){
+  const d1=[60,70,80,90,100][rint(0,4)]; // minutes
+  const pause=[10,15,20][rint(0,2)];
+  const d2=[30,40,50][rint(0,2)];
+  const h = rint(5,18), m=rint(0,45);
+  const depart = h*60+m;
+  const arrivee = depart + d1 + pause + d2;
+  const hh = Math.floor((arrivee% (24*60))/60), mm=(arrivee%60);
+  const ans = String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  const opts = shuffle([ans, '0'+((hh+1)%24)+':'+String(mm).padStart(2,'0'), String(hh).padStart(2,'0')+':'+String((mm+10)%60).padStart(2,'0'), String(hh).padStart(2,'0')+':'+String((mm+20)%60).padStart(2,'0')]);
+  return makeMCQ('BENIN • Transport', `Départ <b>${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</b>. Trajet ${d1} min, pause ${pause} min, puis ${d2} min. Heure d'arrivée ?`, opts, ans);
+}
+function bn_conversion_litres(){
+  const bid=rint(10,30); const nb=rint(2,5); const sup=rint(5,20);
+  const ans = nb*bid + sup;
+  const opts = shuffle([ans, ans+5, ans-5, ans+10].map(String));
+  return makeMCQ('BENIN • Litres', `${nb} bidons de <b>${bid} L</b> + <b>${sup} L</b> → total ?`, opts, String(ans));
+}
+function bn_regions(){
+  // Paires connues : Abomey→Zou, Cotonou→Littoral, Parakou→Borgou, Porto-Novo→Ouémé, Natitingou→Atacora
+  const pairs = [
+    ['Abomey','Zou'], ['Cotonou','Littoral'], ['Parakou','Borgou'],
+    ['Porto-Novo','Ouémé'], ['Natitingou','Atacora']
+  ];
+  const pick = pairs[rint(0,pairs.length-1)];
+  const cities = pairs.map(p=>p[0]);
+  const deps = pairs.map(p=>p[1]);
+  const other = deps.filter(d=> d!==pick[1]);
+  const opts = shuffle([pick[1], other[0], other[1]||deps[0], other[2]||deps[1]]);
+  return makeMCQ('BENIN • Géo', `${pick[0]} est à quel département ?`, opts, pick[1]);
+}
+function bn_ordre_age(){
+  const names = ['Moussa','Akoss','Sèna','Rodrigue','Yann'];
+  const ages = shuffle([12,14,16,18,20]);
+  const arr = names.map((n,i)=> `${n}(${ages[i]} ans)`);
+  const sorted = ages.slice().sort((a,b)=>a-b);
+  const ans = sorted[2];
+  const opts = shuffle([sorted[0],sorted[1],sorted[2],sorted[3]].map(String));
+  return makeMCQ('BENIN • Ordre', `Qui est <b>3ᵉ</b> par âge croissant ?<br><small>${arr.join(' • ')}</small>`, opts, String(ans));
+}
+function bn_partage_cout(){
+  const total=[3000,4500,6000,7500][rint(0,3)];
+  const n=[3,4,5][rint(0,2)];
+  const ans = Math.floor(total/n);
+  const opts = shuffle([ans, ans+50, Math.max(0,ans-50), ans+100].map(String));
+  return makeMCQ('BENIN • Partage', `Course zem à <b>${total} FCFA</b> partagée entre <b>${n}</b> personnes. Part de chacun ?`, opts, String(ans));
+}
+function bn_suite_locale(){
+  const base = rint(2,6), step = rint(2,4);
+  const seq = [base, base+step, base+2*step, base+3*step];
+  const ans = base+4*step;
+  const opts = shuffle([ans, ans+step, ans-step, ans+2*step].map(String));
+  return makeMCQ('BENIN • Suite', `Complète : ${seq.join(' , ')} , ?`, opts, String(ans));
+}
+function bn_fcfa_pourboire(){
+  const note=[1500,2000,3500,5000][rint(0,3)];
+  const tip=[5,10,15][rint(0,2)];
+  const ans = Math.round(note*tip/100);
+  const opts = shuffle([ans, ans+50, Math.max(0,ans-50), ans+100].map(String));
+  return makeMCQ('BENIN • Pourboire', `Note <b>${note} FCFA</b>, pourboire <b>${tip}%</b> = ?`, opts, String(ans));
+}
+function bn_rendu_simple(){
+  const prix=[700,900,1200,1500][rint(0,3)];
+  const payé=[1000,2000,5000][rint(0,2)];
+  const ans = payé - prix;
+  const opts = shuffle([ans, ans-50, ans+50, ans+100].map(String));
+  return makeMCQ('BENIN • Rendu', `Prix: <b>${prix} FCFA</b>, payé: <b>${payé} FCFA</b>. Rendu ?`, opts, String(ans));
+}
+function bn_unites_kg(){
+  const kg=[2,3,5,7][rint(0,3)], add=[1,2,3][rint(0,2)];
+  const ans = kg+add;
+  const opts = shuffle([ans, ans+1, ans-1, ans+2].map(String));
+  return makeMCQ('BENIN • Kg', `Tu achètes <b>${kg} kg</b> de maïs et rajoutes <b>${add} kg</b>. Total ?`, opts, String(ans));
+}
+const beninBankFns = [bn_fcfa_remise,bn_rendu_marche,bn_transport_temps,bn_conversion_litres,bn_regions,bn_ordre_age,bn_partage_cout,bn_suite_locale,bn_fcfa_pourboire,bn_rendu_simple,bn_unites_kg];
 
 /* ---------- Flow ---------- */
 function show(id){
   [scrHome,scrPlay,scrEnd,scrVictory].forEach(s=> s.classList.toggle('hidden', s.id!==id));
 }
 
-function buildLevelTasks(){ return sample(bank, 10).map(g=>g()); }
+function buildTasks(count, bankFns){
+  const out = [];
+  for(let i=0;i<count;i++){
+    const g = bankFns[rint(0,bankFns.length-1)];
+    out.push(g());
+  }
+  return out;
+}
 
-function startLevel(lvl){
+function startRegularLevel(lvl){
+  beninMode = false;
   level = lvl;
   levelEl.textContent = level;
-  totalTime = levelTimes[level] || 90;
-  startedAt = performance.now();
   inLevel = true;
 
-  tasks = buildLevelTasks();
+  tasks = buildTasks(10, globalBank);
   idx = 0;
 
   scoreEl.textContent = score;
@@ -403,7 +513,22 @@ function startLevel(lvl){
   btnValidate.classList.remove('hidden');
   renderTask();
   show('screen-play');
-  tick();
+}
+
+function startBeninLevel(){
+  beninMode = true;
+  levelEl.textContent = 'BENIN';
+  inLevel = true;
+
+  tasks = buildTasks(50, beninBankFns);
+  idx = 0;
+
+  scoreEl.textContent = score;
+  progEl.textContent = `0/${tasks.length}`;
+  btnNext.classList.add('hidden');
+  btnValidate.classList.remove('hidden');
+  renderTask();
+  show('screen-play');
 }
 
 function renderTask(){
@@ -414,15 +539,6 @@ function renderTask(){
   qEl.textContent = `Question ${idx+1}`;
   qArea.innerHTML = '';
   task.render(qArea);
-}
-
-function tick(){
-  if(!inLevel) return;
-  const elapsed = (performance.now() - startedAt)/1000;
-  const remain = Math.max(0, totalTime - elapsed);
-  timeEl.textContent = fmt(remain);
-  if(remain<=0){ inLevel = false; endLevel(false, 'Temps écoulé'); return; }
-  timerId = requestAnimationFrame(tick);
 }
 
 function validate(){
@@ -442,7 +558,7 @@ function validate(){
   }
 }
 function skip(){
-  // aucune pénalité de score, on passe
+  // passe sans pénalité
   btnNext.classList.add('hidden');
   btnValidate.classList.remove('hidden');
   next(true);
@@ -459,12 +575,8 @@ function next(fromSkip=false){
     progEl.textContent = `${idx}/${tasks.length}`;
     renderTask();
   }else{
-    const elapsed = (performance.now() - startedAt)/1000;
-    const remain = Math.max(0, Math.floor((totalTime - elapsed)));
-    score += remain;
-    scoreEl.textContent = score;
     inLevel = false;
-    endLevel(true, `Bonus temps : +${remain}`);
+    endLevel(true, 'Niveau terminé.');
   }
   btnNext.classList.add('hidden');
   btnValidate.classList.remove('hidden');
@@ -472,49 +584,59 @@ function next(fromSkip=false){
 
 /* ---------- End level ---------- */
 function endLevel(success, msg){
-  cancelAnimationFrame(timerId);
-  document.getElementById('endTitle').textContent = success ? `Niveau ${level} terminé` : `Niveau ${level} perdu`;
+  document.getElementById('endTitle').textContent = success ? (beninMode?'Niveau BENIN terminé':`Niveau ${level} terminé`) : (beninMode?'Niveau BENIN perdu':`Niveau ${level} perdu`);
   document.getElementById('endDesc').innerHTML = msg || '';
   show('screen-end');
   localStorage.setItem('psy_score', String(score));
-
-  const btnShowAll = document.getElementById('btnShowAll');
-  const answersList = document.getElementById('answersList');
-
-  if(success){
-    const nextLvl = level+1;
+  if(!beninMode && success){
+    const nextLvl = (typeof level==='number'? level+1 : 1);
     localStorage.setItem('psy_level', String(nextLvl));
     document.getElementById('btnNextLevel').disabled = (nextLvl>10);
-    btnShowAll.classList.add('hidden');
-    answersList.classList.add('hidden');
+    document.getElementById('btnShowAll').classList.add('hidden');
+    document.getElementById('answersList').classList.add('hidden');
     if(nextLvl>10){
       setTimeout(()=>{ show('screen-victory'); beep('victory'); }, 700);
     }
   }else{
-    localStorage.setItem('psy_level', String(level));
+    // soit perdu, soit niveau BENIN (pas de "niveau suivant" logique)
     document.getElementById('btnNextLevel').disabled = true;
-    // proposer "voir toutes les réponses"
-    btnShowAll.classList.remove('hidden');
-    answersList.classList.add('hidden');
+    document.getElementById('btnShowAll').classList.remove('hidden');
+    document.getElementById('answersList').classList.add('hidden');
   }
+  document.getElementById('btnContinue').disabled = false;
 }
 
-/* ---------- Optional strict lose on leaving the app ----------
-document.addEventListener('visibilitychange', ()=>{ if(inLevel && document.hidden){ inLevel=false; endLevel(false, 'Écran quitté'); }});
-window.addEventListener('blur', ()=>{ if(inLevel){ inLevel=false; endLevel(false, 'Écran quitté'); }});
----------------------------------------------------------------- */
-
 /* ---------- Buttons ---------- */
-document.getElementById('btnStart').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); startLevel(1); };
-document.getElementById('btnContinue').onclick = ()=> startLevel(Number(localStorage.getItem('psy_level')||1));
+// Accueil
+document.getElementById('btnQuickStart').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); startRegularLevel(1); };
+document.getElementById('btnContinue').onclick = ()=> {
+  const lv = Number(localStorage.getItem('psy_level')||1);
+  startRegularLevel(lv);
+};
+// Grille niveaux libres
+(function buildLevelButtons(){
+  const grid = document.getElementById('levelsGrid');
+  for(let i=1;i<=10;i++){
+    const b = document.createElement('button');
+    b.className='btn'; b.textContent='Niveau '+i;
+    b.onclick = ()=> startRegularLevel(i);
+    grid.appendChild(b);
+  }
+})();
+document.getElementById('btnBenin').onclick = ()=> startBeninLevel();
+
+// En jeu
 btnValidate.onclick = validate;
 btnNext.onclick = ()=> next(false);
 btnSkip.onclick = skip;
 btnShowAnswer.onclick = showAnswer;
 
-document.getElementById('btnNextLevel').onclick = ()=> startLevel(level+1);
-document.getElementById('btnRetry').onclick = ()=> startLevel(level);
+// Fin de niveau
+document.getElementById('btnNextLevel').onclick = ()=> startRegularLevel((typeof level==='number'? level+1 : 1));
+document.getElementById('btnRetry').onclick = ()=> beninMode ? startBeninLevel() : startRegularLevel(level);
+document.getElementById('btnHome2').onclick = ()=> show('screen-home');
 
+// Liste des réponses
 document.getElementById('btnShowAll').onclick = ()=>{
   const box = document.getElementById('answersList');
   box.innerHTML = '<h3 style="margin:.2rem 0 .3rem;text-align:center">Réponses du niveau</h3>';
@@ -531,15 +653,13 @@ document.getElementById('btnShowAll').onclick = ()=>{
   box.classList.remove('hidden');
 };
 
-document.getElementById('btnReplay').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); show('screen-home'); document.getElementById('btnContinue').disabled=false; scoreEl.textContent='0'; levelEl.textContent='1'; };
-document.getElementById('btnHome').onclick = ()=> show('screen-home');
+// Règles / Quitter
 document.getElementById('btnRules').onclick = ()=> document.getElementById('rules').showModal();
 document.getElementById('closeRules').onclick = ()=> document.getElementById('rules').close();
-document.getElementById('btnQuit').onclick = ()=> { show('screen-home'); };
+document.getElementById('btnQuit').onclick = ()=> { if(inLevel){ inLevel=false; endLevel(false, '👋 Abandon'); } else { show('screen-home'); } };
 
-/* ---------- Init ---------- */
+// Init
 progEl.textContent = '0/0';
-timeEl.textContent = '00:00';
 levelEl.textContent = level;
 scoreEl.textContent = score;
 
