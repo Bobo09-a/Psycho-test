@@ -22,38 +22,54 @@ body{
     linear-gradient(180deg,var(--bg1),var(--bg2));
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.app{width:min(520px,94vw); height:min(820px,96vh); border:1px solid var(--line); border-radius:16px;
+.app{
+  width:min(520px,100vw);
+  height:100dvh; /* plein écran mobile réel */
+  border:1px solid var(--line); border-radius:16px;
   background:linear-gradient(180deg,rgba(15,18,45,.92),rgba(5,7,20,.92));
   box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
   position:relative; overflow:hidden;
+  padding-bottom:calc(env(safe-area-inset-bottom));
+  padding-top:calc(env(safe-area-inset-top));
 }
-header{position:absolute; left:12px; right:12px; top:12px; z-index:5}
-.hud{display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap}
-.chip{padding:.45rem .6rem; border:1px solid var(--line); border-radius:999px; background:linear-gradient(180deg,rgba(18,22,58,.8),rgba(10,12,34,.8)); box-shadow:var(--glow-cyan); font-variant-numeric:tabular-nums}
-main{position:absolute; inset:68px 12px 84px 12px; display:grid; place-items:center}
-.card{width:100%; max-width:460px; background:linear-gradient(180deg,rgba(22,26,72,.96),rgba(12,14,38,.96)); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 14px 40px rgba(0,0,0,.25)}
-h1{margin:.2rem 0 .6rem; font-size:22px; text-align:center; text-shadow:var(--glow-mag)}
-h2{margin:.2rem 0 .6rem; font-size:20px; text-align:center}
+header{position:absolute; left:10px; right:10px; top:10px; z-index:5}
+.hud{display:flex; gap:6px; justify-content:space-between; flex-wrap:wrap}
+.chip{padding:.35rem .55rem; border:1px solid var(--line); border-radius:999px; background:linear-gradient(180deg,rgba(18,22,58,.85),rgba(10,12,34,.85)); box-shadow:var(--glow-cyan); font-variant-numeric:tabular-nums; font-size:.95rem}
+main{
+  position:absolute;
+  left:10px; right:10px;
+  top:58px; bottom:68px; /* laisse toujours voir header + footer */
+  overflow:auto; -webkit-overflow-scrolling:touch;
+}
+.card{width:100%; max-width:460px; margin:0 auto; background:linear-gradient(180deg,rgba(22,26,72,.96),rgba(12,14,38,.96)); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 14px 40px rgba(0,0,0,.25)}
+h1{margin:.2rem 0 .4rem; font-size:20px; text-align:center; text-shadow:var(--glow-mag)}
+h2{margin:.2rem 0 .4rem; font-size:19px; text-align:center}
 p{margin:.2rem 0}
 .muted{color:var(--muted); text-align:center}
-.btn{appearance:none; border:1px solid var(--line); background:linear-gradient(180deg,rgba(25,31,84,.9),rgba(16,18,48,.9)); color:var(--txt); border-radius:12px; padding:.9rem 1rem; width:100%; font-weight:800; letter-spacing:.02em; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.btn{appearance:none; border:1px solid var(--line); background:linear-gradient(180deg,rgba(25,31,84,.9),rgba(16,18,48,.9)); color:var(--txt); border-radius:12px; padding:.8rem .9rem; width:100%; font-weight:800; letter-spacing:.02em; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
 .btn.primary{background:linear-gradient(135deg,#00e5ff,#7aa2ff); color:#06122a; border-color:transparent; box-shadow:0 10px 30px rgba(0,229,255,.35)}
-.row{display:flex; gap:10px; flex-wrap:wrap}
-.grid{display:grid; gap:10px}
+.btn.warn{background:linear-gradient(180deg,#2b0f24,#190916); border-color:#61203f}
+.row{display:flex; gap:8px; flex-wrap:wrap}
+.grid{display:grid; gap:8px}
 .center{text-align:center}
-.input{width:100%; padding:1rem; border-radius:12px; border:1px solid #2a3688; background:linear-gradient(180deg,#070a1b,#0b0f26); color:var(--txt); font-weight:800; text-align:center; font-size:20px; box-shadow:inset var(--glow-cyan)}
-.options{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
-.tag{display:inline-flex; gap:8px; align-items:center; padding:.35rem .55rem; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.04); color:var(--muted); font-size:.9rem}
+.input{width:100%; padding:.9rem; border-radius:12px; border:1px solid #2a3688; background:linear-gradient(180deg,#070a1b,#0b0f26); color:var(--txt); font-weight:800; text-align:center; font-size:19px; box-shadow:inset var(--glow-cyan)}
+.options{display:grid; grid-template-columns: 1fr 1fr; gap:8px}
+.tag{display:inline-flex; gap:8px; align-items:center; padding:.3rem .5rem; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.04); color:var(--muted); font-size:.9rem}
 .ok{color:var(--green); text-align:center; margin-top:.3rem}
 .ko{color:var(--red); text-align:center; margin-top:.3rem}
-footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:10px; justify-content:space-between}
+footer{
+  position:absolute; left:10px; right:10px; bottom:10px;
+  display:flex; gap:8px; justify-content:space-between;
+  padding-bottom:calc(env(safe-area-inset-bottom));
+}
 .ghost{background:transparent; box-shadow:var(--glow-cyan) inset}
 .hidden{display:none!important}
-/* victory */
-.victory{display:grid; place-items:center; gap:10px; padding:20px; text-align:center}
-.victory h1{font-size:28px; color:#bfefff; text-shadow:0 0 12px rgba(0,229,255,.6), 0 0 30px rgba(185,103,255,.45); animation:pulse 1.8s infinite ease-in-out}
-@keyframes pulse{0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)}}
 .small{font-size:.9rem}
+
+/* victory */
+.victory{display:grid; place-items:center; gap:10px; padding:14px; text-align:center}
+.victory h1{font-size:30px; letter-spacing:.08em; color:#bfefff; text-shadow:0 0 14px rgba(0,229,255,.6), 0 0 34px rgba(185,103,255,.45); animation:pulse 1.8s infinite ease-in-out}
+@keyframes pulse{0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -70,13 +86,12 @@ footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:
   <main>
     <!-- Home -->
     <section id="screen-home" class="card">
-      <h1>PSYCHOTEST<br><span style="font-size:.9em">by <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></span></h1>
-      <p class="muted">Entraînement psychotechnique — 10 niveaux, 10 tests aléatoires par niveau.</p>
-      <div class="grid" style="margin-top:10px">
+      <h1>PSYCHOTEST<br><span style="font-size:.95em">by <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></span></h1>
+      <p class="muted">10 niveaux • 10 tests aléatoires par niveau • Mobile only</p>
+      <div class="grid" style="margin-top:8px">
         <button class="btn primary" id="btnStart">▶️ Démarrer</button>
         <button class="btn" id="btnContinue" disabled>⏩ Continuer</button>
       </div>
-      <div class="center small" style="margin-top:6px"><span class="tag">Mobile • tactile</span></div>
     </section>
 
     <!-- Play -->
@@ -85,9 +100,15 @@ footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:
       <h2 id="question">Question</h2>
       <div id="qArea" style="margin-top:6px"></div>
       <div id="feedback" class="muted" aria-live="polite" style="min-height:1.2em; margin-top:6px"></div>
-      <div class="grid" style="margin-top:10px">
-        <button id="btnValidate" class="btn">Valider</button>
-        <button id="btnNext" class="btn hidden">Suivant</button>
+      <div class="grid" style="margin-top:8px">
+        <div class="row">
+          <button id="btnValidate" class="btn">Valider</button>
+          <button id="btnSkip" class="btn ghost">Passer</button>
+        </div>
+        <div class="row">
+          <button id="btnShowAnswer" class="btn warn">Voir la réponse</button>
+          <button id="btnNext" class="btn hidden">Suivant</button>
+        </div>
       </div>
     </section>
 
@@ -95,7 +116,9 @@ footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:
     <section id="screen-end" class="card hidden">
       <h2 id="endTitle">Niveau terminé</h2>
       <p id="endDesc" class="muted">—</p>
-      <div class="grid" style="margin-top:10px">
+      <div id="answersList" class="hidden" style="text-align:left; margin:8px 0 0"></div>
+      <div class="grid" style="margin-top:8px">
+        <button id="btnShowAll" class="btn warn hidden">Voir toutes les réponses du niveau</button>
         <button id="btnNextLevel" class="btn primary">Niveau suivant</button>
         <button id="btnRetry" class="btn">Recommencer le niveau</button>
       </div>
@@ -103,8 +126,8 @@ footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:
 
     <!-- Victory -->
     <section id="screen-victory" class="card hidden victory">
-      <h1>Victoire — <span style="background:linear-gradient(135deg,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent">MARTIAL H</span></h1>
-      <p class="muted">Tu as complété les 10 niveaux de PSYCHOTEST !</p>
+      <h1>VICTOIRE</h1>
+      <p class="muted">Bravo, tu as complété les 10 niveaux de PSYCHOTEST !</p>
       <div class="grid" style="width:100%; max-width:320px; margin-top:8px">
         <button id="btnReplay" class="btn">Rejouer depuis le niveau 1</button>
         <button id="btnHome" class="btn ghost">Retour accueil</button>
@@ -119,12 +142,13 @@ footer{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:
 </div>
 
 <dialog id="rules" style="max-width:560px;width:92%;border:1px solid #26307a;border-radius:12px;background:linear-gradient(180deg,rgba(22,26,72,.98),rgba(12,14,38,.98));color:var(--txt)">
-  <div style="padding:14px">
-    <h3 style="margin:.2rem 0 .4rem;text-shadow:var(--glow-cyan)">Règles</h3>
+  <div style="padding:12px">
+    <h3 style="margin:.2rem 0 .3rem;text-shadow:var(--glow-cyan)">Règles</h3>
     <ul class="small">
       <li>10 niveaux. Chaque niveau génère <b>10 tests aléatoires</b>.</li>
-      <li>Tu réponds à une question à la fois. Chrono par niveau.</li>
+      <li>Une question à la fois. Chrono par niveau.</li>
       <li>Score = bonnes réponses (+10) + bonus de temps.</li>
+      <li>Tu peux <b>passer</b> une question et <b>voir la réponse</b>.</li>
       <li>Progression sauvegardée (localStorage).</li>
     </ul>
     <div style="text-align:right"><button id="closeRules" class="btn" style="width:auto;padding:.5rem .8rem">OK</button></div>
@@ -167,6 +191,8 @@ const qArea   = document.getElementById('qArea');
 const feedback= document.getElementById('feedback');
 const btnValidate = document.getElementById('btnValidate');
 const btnNext = document.getElementById('btnNext');
+const btnSkip = document.getElementById('btnSkip');
+const btnShowAnswer = document.getElementById('btnShowAnswer');
 
 let level = Number(localStorage.getItem('psy_level')||1);
 let score = Number(localStorage.getItem('psy_score')||0);
@@ -175,7 +201,7 @@ let startedAt = 0;
 let totalTime = 0;
 let timerId = null;
 
-let tasks = []; // array of {render, check, type}
+let tasks = []; // array of {type, render(area), check() -> bool, solution, label}
 let idx = 0;
 
 scoreEl.textContent = score;
@@ -192,11 +218,11 @@ const shuffle = (arr)=> arr.map(v=> [Math.random(), v]).sort((a,b)=>a[0]-b[0]).m
 const pad = n=> String(n).padStart(2,'0');
 const fmt = s=> pad(Math.floor(s/60))+':'+pad(Math.floor(s%60));
 
-/* ---------- Task builders ---------- */
+/* ---------- Task builders w/ solutions ---------- */
 function makeInputTask(type, html, answer){
   let correct = answer;
   return {
-    type, 
+    type, solution: String(correct), label: html.replace(/<[^>]+>/g,''),
     render(area){
       area.innerHTML = `<div class="center muted small" style="margin-bottom:6px">${html}</div>
         <input id="ans" class="input" inputmode="numeric" placeholder="Réponse">`;
@@ -210,7 +236,7 @@ function makeInputTask(type, html, answer){
 }
 function makeTextTask(type, html, answer){
   return {
-    type,
+    type, solution: String(answer), label: html.replace(/<[^>]+>/g,''),
     render(area){
       area.innerHTML = `<div class="center muted" style="margin-bottom:6px">${html}</div>
         <input id="ans" class="input" inputmode="text" placeholder="Réponse (lettre/symbole)">`;
@@ -224,7 +250,7 @@ function makeTextTask(type, html, answer){
 }
 function makeMCQ(type, html, options, correct){
   return {
-    type,
+    type, solution: String(correct), label: html.replace(/<[^>]+>/g,''),
     render(area){
       area.innerHTML = `<div class="center muted" style="margin-bottom:6px">${html}</div>
         <div class="options" id="opts"></div>
@@ -292,7 +318,7 @@ function genMemory(){
   const len=rint(6,8);
   const code = Array.from({length:len}, ()=> rint(0,9)).join('');
   return {
-    type: 'Mémoire',
+    type: 'Mémoire', solution: code, label: 'Mémorise un nombre',
     render(area){
       area.innerHTML = `<div class="center muted small">Mémorise ce nombre (2s)…</div>
         <div class="center" style="font-size:28px;margin:6px 0"><b id="mem">${code}</b></div>
@@ -345,7 +371,6 @@ function genSymbols(){
   return makeTextTask('Détail visuel', `Quel est le symbole <b>différent</b> ?<br><div class="center" style="font-size:26px;margin-top:6px">${shuffle(s).join(' ')}</div>`, special);
 }
 function genLogicPattern(){
-  // logique simple: paire/impair/multiple
   const a = rint(2,9);
   const seq = [a, a+2, a+4, a+6];
   const ans = a+8;
@@ -360,16 +385,7 @@ function show(id){
   [scrHome,scrPlay,scrEnd,scrVictory].forEach(s=> s.classList.toggle('hidden', s.id!==id));
 }
 
-function difficultyBias(lvl){
-  // renvoie un facteur (1..3) pour ajuster certains paramètres si besoin
-  return Math.min(3, 1 + Math.floor((lvl-1)/3));
-}
-
-function buildLevelTasks(lvl){
-  // 10 tâches tirées de la banque, avec mélange
-  const gens = sample(bank, 10);
-  return gens.map(g => g());
-}
+function buildLevelTasks(){ return sample(bank, 10).map(g=>g()); }
 
 function startLevel(lvl){
   level = lvl;
@@ -378,7 +394,7 @@ function startLevel(lvl){
   startedAt = performance.now();
   inLevel = true;
 
-  tasks = buildLevelTasks(level);
+  tasks = buildLevelTasks();
   idx = 0;
 
   scoreEl.textContent = score;
@@ -405,11 +421,7 @@ function tick(){
   const elapsed = (performance.now() - startedAt)/1000;
   const remain = Math.max(0, totalTime - elapsed);
   timeEl.textContent = fmt(remain);
-  if(remain<=0){
-    inLevel = false;
-    endLevel(false, 'Temps écoulé');
-    return;
-  }
+  if(remain<=0){ inLevel = false; endLevel(false, 'Temps écoulé'); return; }
   timerId = requestAnimationFrame(tick);
 }
 
@@ -425,17 +437,26 @@ function validate(){
     btnNext.classList.remove('hidden');
   }else{
     beep('bad');
-    feedback.textContent = 'Incorrect ❌';
+    feedback.textContent = 'Incorrect ❌ (tu peux Voir la réponse ou Passer)';
     feedback.className = 'ko';
   }
 }
+function skip(){
+  // aucune pénalité de score, on passe
+  btnNext.classList.add('hidden');
+  btnValidate.classList.remove('hidden');
+  next(true);
+}
+function showAnswer(){
+  const sol = tasks[idx].solution ?? '—';
+  feedback.innerHTML = `💡 Réponse : <b>${sol}</b>`;
+  feedback.className = 'ok';
+}
 
-function next(){
+function next(fromSkip=false){
   if(idx < tasks.length-1){
     idx++;
     progEl.textContent = `${idx}/${tasks.length}`;
-    btnNext.classList.add('hidden');
-    btnValidate.classList.remove('hidden');
     renderTask();
   }else{
     const elapsed = (performance.now() - startedAt)/1000;
@@ -445,26 +466,37 @@ function next(){
     inLevel = false;
     endLevel(true, `Bonus temps : +${remain}`);
   }
+  btnNext.classList.add('hidden');
+  btnValidate.classList.remove('hidden');
 }
 
+/* ---------- End level ---------- */
 function endLevel(success, msg){
   cancelAnimationFrame(timerId);
   document.getElementById('endTitle').textContent = success ? `Niveau ${level} terminé` : `Niveau ${level} perdu`;
   document.getElementById('endDesc').innerHTML = msg || '';
   show('screen-end');
   localStorage.setItem('psy_score', String(score));
+
+  const btnShowAll = document.getElementById('btnShowAll');
+  const answersList = document.getElementById('answersList');
+
   if(success){
     const nextLvl = level+1;
     localStorage.setItem('psy_level', String(nextLvl));
     document.getElementById('btnNextLevel').disabled = (nextLvl>10);
+    btnShowAll.classList.add('hidden');
+    answersList.classList.add('hidden');
     if(nextLvl>10){
       setTimeout(()=>{ show('screen-victory'); beep('victory'); }, 700);
     }
   }else{
     localStorage.setItem('psy_level', String(level));
     document.getElementById('btnNextLevel').disabled = true;
+    // proposer "voir toutes les réponses"
+    btnShowAll.classList.remove('hidden');
+    answersList.classList.add('hidden');
   }
-  document.getElementById('btnContinue').disabled = false;
 }
 
 /* ---------- Optional strict lose on leaving the app ----------
@@ -476,9 +508,29 @@ window.addEventListener('blur', ()=>{ if(inLevel){ inLevel=false; endLevel(false
 document.getElementById('btnStart').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); startLevel(1); };
 document.getElementById('btnContinue').onclick = ()=> startLevel(Number(localStorage.getItem('psy_level')||1));
 btnValidate.onclick = validate;
-btnNext.onclick = next;
+btnNext.onclick = ()=> next(false);
+btnSkip.onclick = skip;
+btnShowAnswer.onclick = showAnswer;
+
 document.getElementById('btnNextLevel').onclick = ()=> startLevel(level+1);
 document.getElementById('btnRetry').onclick = ()=> startLevel(level);
+
+document.getElementById('btnShowAll').onclick = ()=>{
+  const box = document.getElementById('answersList');
+  box.innerHTML = '<h3 style="margin:.2rem 0 .3rem;text-align:center">Réponses du niveau</h3>';
+  const ul = document.createElement('ul'); ul.style.listStyle='none'; ul.style.padding='0'; ul.style.display='grid'; ul.style.gap='6px';
+  tasks.forEach((t,i)=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<div class="card" style="padding:8px">
+      <div class="small"><b>Q${i+1}</b> — <span class="tag">${t.type}</span></div>
+      <div class="small" style="opacity:.85;margin-top:4px">Réponse : <b>${t.solution ?? '—'}</b></div>
+    </div>`;
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+  box.classList.remove('hidden');
+};
+
 document.getElementById('btnReplay').onclick = ()=>{ score=0; localStorage.setItem('psy_score','0'); localStorage.setItem('psy_level','1'); show('screen-home'); document.getElementById('btnContinue').disabled=false; scoreEl.textContent='0'; levelEl.textContent='1'; };
 document.getElementById('btnHome').onclick = ()=> show('screen-home');
 document.getElementById('btnRules').onclick = ()=> document.getElementById('rules').showModal();
